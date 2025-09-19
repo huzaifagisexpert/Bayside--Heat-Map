@@ -36,7 +36,9 @@
 
 /* Optional: Title text */
 #map-title span {
-  font-size: 32px; /* Match font size with the parent container */
+  font-size: 32px;
+  font-style: italic; /* This tilts the font */
+  font-family: Arial, sans-serif;
 }
 
 
@@ -199,3 +201,4 @@
 .leaflet-popup-tip {
   background-color: #f9f9f9;
 }
+
