@@ -1,0 +1,201 @@
+/* Map should take full screen */
+/* Map title with image */
+/* Map title with image */
+#map-title {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: left;
+  font-size: 24px; /* This should work now */
+  font-weight: bold;
+  padding: 6px;
+  background: #f8f8f8;
+  border-bottom: 2px solid #b61111;
+  font-family: Arial, sans-serif;
+  z-index: 1000; /* stays above map */
+  display: flex;
+  align-items: center;
+}
+
+/* Styling the image */
+#logo {
+  width: 50px; /* Set your desired width */
+  height: 50px;
+  margin-right: 10px; /* Space between the image and title */
+}
+
+/* Map container */
+#map {
+  position: absolute;
+  top: 56px; /* height of the title bar (12px padding + font size approx) */
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Optional: Title text */
+#map-title span {
+  font-size: 32px; /* Match font size with the parent container */
+}
+
+
+/* Legend styling */
+#map-legend {
+  position: absolute;
+  bottom: 10px;   /* move to bottom */
+  right: 10px;    /* move to right */
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 1000; /* keep above map */
+}
+
+.legend-title {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.legend-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border-radius: 50%;
+  border: 1px solid #333;
+}
+
+.office-icon {
+  width: 20px;
+  height: 20px;
+  background: url('pin.png') no-repeat center center;
+  background-size: contain;
+  border: none;   /* remove circle border */
+  border-radius: 0; /* no round shape */
+}
+
+
+.student-icon {
+  background: blue;  /* student */
+}
+.buffer-control {
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  font-family: Arial, sans-serif;
+  min-width: 140px;
+}
+
+.buffer-control button {
+  width: 100%;
+  background: #007bff;
+  border: none;
+  color: white;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.buffer-control button:hover {
+  background: #0056b3;
+}
+
+.buffer-control button.active {
+  background: #28a745; /* green when active */
+}
+
+#buffer-input-box {
+  margin-top: 6px;
+  text-align: left;
+}
+
+#buffer-input-box label {
+  font-size: 12px;
+  display: block;
+  margin-bottom: 2px;
+  font-weight: bold;
+}
+
+#buffer-input-box input {
+  width: 100%;
+  padding: 4px;
+  font-size: 13px;
+  margin-bottom: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#buffer-input-box small {
+  font-size: 11px;
+  color: #555;
+}.export-control button {
+  background: #28a745;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+  width: 100%;
+}
+
+.export-control button:hover {
+  background: #218838;
+}
+
+.popup-content {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+  padding: 8px;
+  max-width: 250px;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 4px;
+}
+
+.popup-row {
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.popup-row strong {
+  min-width: 80px;
+  display: inline-block;
+  color: #2c3e50;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: #f9f9f9;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-popup-tip {
+  background-color: #f9f9f9;
+}
