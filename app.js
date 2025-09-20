@@ -34,8 +34,12 @@ const baseMaps = {
 
 // --- Clusters & Heatmap Data ---
 // Global storage
-const stripeCluster = L.markerClusterGroup();
-const enrollwareCluster = L.markerClusterGroup();
+// Create the shared cluster group
+const sharedClusterGroup = L.markerClusterGroup();
+
+// Separate layer groups for toggling and styling
+const stripeLayer = L.layerGroup();
+const enrollwareLayer = L.layerGroup();
 const officeLayer = L.layerGroup();
 
 let stripeHeatData = [];
@@ -94,8 +98,10 @@ async function loadGoogleSheet(sheetId, type) {
                         <div><b>Address:</b> ${row["Full Address"] || "No address"}</div>
                     </div>`
                 );
-                stripeCluster.addLayer(marker);
+                stripeLayer.addLayer(marker);         // For toggle and style
+                sharedClusterGroup.addLayer(marker);  // For clustering
                 stripeHeatData.push([lat, lon, 1]);
+
             } else if (type === "enrollware") {
                 const marker = L.circleMarker([lat, lon], {
                     radius: 6,
@@ -111,8 +117,10 @@ async function loadGoogleSheet(sheetId, type) {
                         <div><b>Address:</b> ${row["Full Address"] || "No address"}</div>
                     </div>`
                 );
-                enrollwareCluster.addLayer(marker);
+                enrollwareLayer.addLayer(marker);     // For toggle and style
+                sharedClusterGroup.addLayer(marker);  // For clustering
                 enrollwareHeatData.push([lat, lon, 1]);
+
             } else if (type === "office") {
                 const marker = L.marker([lat, lon], { icon: officeIcon }).bindPopup(
                     `<div class="popup-content">
@@ -132,17 +140,21 @@ async function loadGoogleSheet(sheetId, type) {
     combinedHeatmap.setLatLngs(allHeatData);
 }
 
+// --- Map Setup (Make sure you have defined `baseMaps` and `map` somewhere before this)
+map.addLayer(sharedClusterGroup);  // 👈 Add the shared cluster group to the map
+
+// --- Overlay controls
 const overlays = {
-    "Stripe Students (Clusters)": stripeCluster,
-    "Enrollware Students (Clusters)": enrollwareCluster,
+    "Stripe Students (Clusters)": stripeLayer,
+    "Enrollware Students (Clusters)": enrollwareLayer,
     "All Students (Heatmap)": combinedHeatmap,
     "Offices": officeLayer
 };
 
+// Add layer control to map
 L.control.layers(baseMaps, overlays).addTo(map);
 
-// Load Google Sheets data
-// Replace these IDs with your real Google Sheet IDs
+// --- Load Google Sheets data
 loadGoogleSheet("108nlOCTbbCDhZxO53zF-B13VGaDXOdJbrjIgpygz1ys", "office");
 loadGoogleSheet("176DPR5eamz3K4dN5xLy9CYYEscxc0I7N49ZtlTRke5o", "stripe");
 loadGoogleSheet("1NUYtyLyPppreqoFPRfinCphl8u_6Fv6t95s--6LMT0Y", "enrollware");
@@ -322,6 +334,7 @@ map.on("click", function (e) {
 map.addLayer(stripeCluster);
 map.addLayer(enrollwareCluster);
 map.addLayer(officeLayer);
+
 
 
 
