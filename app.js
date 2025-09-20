@@ -137,6 +137,11 @@ async function loadGoogleSheet(sheetId, type) {
 }
 
 
+const unifiedClusterGroup = L.markerClusterGroup();
+
+// Add both Stripe and Enrollware markers to the unified cluster group
+unifiedClusterGroup.addLayer(stripeCluster);
+unifiedClusterGroup.addLayer(enrollwareCluster);
 
 
 // --- Layer control ---
@@ -144,7 +149,8 @@ const overlays = {
   "Stripe Students (Clusters)": stripeCluster,
   "Enrollware Students (Clusters)": enrollwareCluster,
   "All Students (Heatmap)": combinedHeatmap,
-  "Offices": officeLayer
+  "Offices": officeLayer,
+  "Unified Clusters": unifiedClusterGroup // Added new option for the unified cluster layer
 };
 
 L.control.layers(baseMaps, overlays).addTo(map);
@@ -329,3 +335,4 @@ map.on("click", function (e) {
 map.addLayer(stripeCluster);
 map.addLayer(enrollwareCluster);
 map.addLayer(officeLayer);
+
