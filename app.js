@@ -36,11 +36,8 @@ const baseMaps = {
 // Global storage
 // Create the shared cluster group
 // Create a single cluster group that will hold all student markers (both Stripe + Enrollware)
-const sharedClusterGroup = L.markerClusterGroup();
-
-// Separate layer groups for toggling visibility (hold the same markers as sharedClusterGroup)
-const stripeLayer = L.layerGroup();
-const enrollwareLayer = L.layerGroup();
+const stripeCluster = L.markerClusterGroup();
+const enrollwareCluster = L.markerClusterGroup();
 const officeLayer = L.layerGroup();
 
 let stripeHeatData = [];
@@ -49,116 +46,107 @@ let allHeatData = [];
 
 // Unified heatmap (Stripe + Enrollware combined)
 const combinedHeatmap = L.heatLayer([], {
-    radius: 35,
-    blur: 20,
-    maxZoom: 17,
-    max: 1.0,
-    gradient: {
-        0.2: 'green',
-        0.4: 'green',
-        0.6: 'lime',
-        0.8: 'orange',
-        1.0: 'red'
-    }
+  radius: 35,
+  blur: 20,
+  maxZoom: 17,
+  max: 1.0,
+  gradient: {
+    0.2: 'green',
+    0.4: 'green',
+    0.6: 'lime',
+    0.8: 'orange',
+    1.0: 'red'
+  }
 });
 
 // Custom office icon
 const officeIcon = L.icon({
-    iconUrl: 'pin.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-});
-
-// Custom colored icons for Stripe and Enrollware markers
-const blueIcon = L.divIcon({
-    className: 'custom-marker',
-    html: '<div style="width:12px; height:12px; background-color:blue; border-radius:50%; border:1px solid #333;"></div>',
-    iconSize: [12, 12],
-    iconAnchor: [6, 6]
-});
-
-const greenIcon = L.divIcon({
-    className: 'custom-marker',
-    html: '<div style="width:12px; height:12px; background-color:green; border-radius:50%; border:1px solid #333;"></div>',
-    iconSize: [12, 12],
-    iconAnchor: [6, 6]
+  iconUrl: 'pin.png',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
 });
 
 // --- Load Google Sheet as CSV ---
 async function loadGoogleSheet(sheetId, type) {
-    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
-    const response = await fetch(csvUrl);
-    const csvText = await response.text();
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
+  const response = await fetch(csvUrl);
+  const csvText = await response.text();
 
-    // Parse CSV → JSON
-    const data = Papa.parse(csvText, { header: true }).data;
+  // Parse CSV → JSON
+  const data = Papa.parse(csvText, { header: true }).data;
 
-    data.forEach(row => {
-        const lat = parseFloat(row.Latitude);
-        const lon = parseFloat(row.Longitude);
+  data.forEach(row => {
+    const lat = parseFloat(row.Latitude);
+    const lon = parseFloat(row.Longitude);
 
-        if (!isNaN(lat) && !isNaN(lon)) {
-            if (type === "stripe") {
-                const marker = L.marker([lat, lon], { icon: blueIcon }).bindPopup(`
-                    <div class="popup-content">
-                        <div class="popup-title"><b>Stripe Student</b></div>
-                        <div><b>Address:</b> ${row["Full Address"] || "No address"}</div>
-                    </div>
-                `);
+    if (!isNaN(lat) && !isNaN(lon)) {
+      if (type === "stripe") {
+        const marker = L.circleMarker([lat, lon], {
+          radius: 6,
+          fillColor: "blue",
+          color: "#333",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.8,
+          data: row
+        }).bindPopup(`
+          <div class="popup-content">
+            <div class="popup-title"><b>Stripe Student</b></div>
+            <div><b>Address:</b> ${row["Full Address"] || "No address"}</div>
+          </div>
+        `);
+        stripeCluster.addLayer(marker);
+        stripeHeatData.push([lat, lon, 1]);
 
-                sharedClusterGroup.addLayer(marker);
-                stripeLayer.addLayer(marker);
-                stripeHeatData.push([lat, lon, 1]);
+      } else if (type === "enrollware") {
+        const marker = L.circleMarker([lat, lon], {
+          radius: 6,
+          fillColor: "green",
+          color: "#333",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.8,
+          data: row
+        }).bindPopup(`
+          <div class="popup-content">
+            <div class="popup-title"><b>Enrollware Student</b></div>
+            <div><b>Address:</b> ${row["Full Address"] || "No address"}</div>
+          </div>
+        `);
+        enrollwareCluster.addLayer(marker);
+        enrollwareHeatData.push([lat, lon, 1]);
 
-            } else if (type === "enrollware") {
-                const marker = L.marker([lat, lon], { icon: greenIcon }).bindPopup(`
-                    <div class="popup-content">
-                        <div class="popup-title"><b>Enrollware Student</b></div>
-                        <div><b>Address:</b> ${row["Full Address"] || "No address"}</div>
-                    </div>
-                `);
+      } else if (type === "office") {
+        const marker = L.marker([lat, lon], { icon: officeIcon }).bindPopup(`
+          <div class="popup-content">
+            <div class="popup-title">Office</div>
+            <div><b>Address:</b> ${row["Address"] || "No address"}</div>
+            <div><b>City:</b> ${row["City"] || "Unknown"}</div>
+            <div><b>Phone:</b> ${row["Phone Number"] || "Unknown"}</div>
+          </div>
+        `);
+        officeLayer.addLayer(marker);
+      }
+    }
+  });
 
-                sharedClusterGroup.addLayer(marker);
-                enrollwareLayer.addLayer(marker);
-                enrollwareHeatData.push([lat, lon, 1]);
-
-            } else if (type === "office") {
-                const marker = L.marker([lat, lon], { icon: officeIcon }).bindPopup(`
-                    <div class="popup-content">
-                        <div class="popup-title">Office</div>
-                        <div><b>Address:</b> ${row["Address"] || "No address"}</div>
-                        <div><b>City:</b> ${row["City"] || "Unknown"}</div>
-                        <div><b>Phone:</b> ${row["Phone Number"] || "Unknown"}</div>
-                    </div>
-                `);
-                officeLayer.addLayer(marker);
-            }
-        }
-    });
-
-    // 🔹 Rebuild combined heatmap
-    allHeatData = [...stripeHeatData, ...enrollwareHeatData];
-    combinedHeatmap.setLatLngs(allHeatData);
+  // 🔹 Rebuild combined heatmap
+  allHeatData = [...stripeHeatData, ...enrollwareHeatData];
+  combinedHeatmap.setLatLngs(allHeatData);
 }
 
-// Add the shared cluster group to the map initially
-map.addLayer(sharedClusterGroup);
-
-// Overlays for control with separate toggles for stripe and enrollware markers (via their layerGroups),
-// plus the sharedClusterGroup for clustering all markers visually.
-// We toggle visibility of marker layers separately but clustering is managed globally.
 const overlays = {
-    "Stripe Students": stripeLayer,
-    "Enrollware Students": enrollwareLayer,
-    "All Students (Clusters)": sharedClusterGroup,
-    "All Students (Heatmap)": combinedHeatmap,
-    "Offices": officeLayer
+  "Stripe Students (Clusters)": stripeCluster,
+  "Enrollware Students (Clusters)": enrollwareCluster,
+  "All Students (Heatmap)": combinedHeatmap,
+  "Offices": officeLayer
 };
 
 L.control.layers(baseMaps, overlays).addTo(map);
 
-// Load Google Sheets data (replace IDs with yours)
+// Load Excel files
+// Replace these IDs with your real Google Sheet IDs
 loadGoogleSheet("108nlOCTbbCDhZxO53zF-B13VGaDXOdJbrjIgpygz1ys", "office");
 loadGoogleSheet("176DPR5eamz3K4dN5xLy9CYYEscxc0I7N49ZtlTRke5o", "stripe");
 loadGoogleSheet("1NUYtyLyPppreqoFPRfinCphl8u_6Fv6t95s--6LMT0Y", "enrollware");
@@ -338,6 +326,7 @@ map.on("click", function (e) {
 map.addLayer(stripeCluster);
 map.addLayer(enrollwareCluster);
 map.addLayer(officeLayer);
+
 
 
 
