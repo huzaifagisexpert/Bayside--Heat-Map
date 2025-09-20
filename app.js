@@ -34,8 +34,7 @@ const baseMaps = {
 
 // --- Clusters & Heatmap Data ---
 // Global storage
-const stripeCluster = L.markerClusterGroup();
-const enrollwareCluster = L.markerClusterGroup();
+const unifiedClusterGroup = L.markerClusterGroup();
 const officeLayer = L.layerGroup();
 
 let stripeHeatData = [];
@@ -95,7 +94,8 @@ async function loadGoogleSheet(sheetId, type) {
           </div>
         `);
 
-        stripeCluster.addLayer(marker);
+        // Add marker to the unified cluster group
+        unifiedClusterGroup.addLayer(marker);
         stripeHeatData.push([lat, lon, 1]);
 
       } else if (type === "enrollware") {
@@ -114,7 +114,8 @@ async function loadGoogleSheet(sheetId, type) {
           </div>
         `);
 
-        enrollwareCluster.addLayer(marker);
+        // Add marker to the unified cluster group
+        unifiedClusterGroup.addLayer(marker);
         enrollwareHeatData.push([lat, lon, 1]);
 
       } else if (type === "office") {
@@ -136,27 +137,16 @@ async function loadGoogleSheet(sheetId, type) {
   combinedHeatmap.setLatLngs(allHeatData);
 }
 
-
-const unifiedClusterGroup = L.markerClusterGroup();
-
-// Add both Stripe and Enrollware markers to the unified cluster group
-unifiedClusterGroup.addLayer(stripeCluster);
-unifiedClusterGroup.addLayer(enrollwareCluster);
-
-
 // --- Layer control ---
 const overlays = {
-  "Stripe Students (Clusters)": stripeCluster,
-  "Enrollware Students (Clusters)": enrollwareCluster,
+  "Unified Clusters (Stripe + Enrollware)": unifiedClusterGroup,  // Unified clustering layer
   "All Students (Heatmap)": combinedHeatmap,
-  "Offices": officeLayer,
-  "Unified Clusters": unifiedClusterGroup // Added new option for the unified cluster layer
+  "Offices": officeLayer
 };
 
 L.control.layers(baseMaps, overlays).addTo(map);
 
 // Load Excel files
-// Replace these IDs with your real Google Sheet IDs
 loadGoogleSheet("108nlOCTbbCDhZxO53zF-B13VGaDXOdJbrjIgpygz1ys", "office");
 loadGoogleSheet("176DPR5eamz3K4dN5xLy9CYYEscxc0I7N49ZtlTRke5o", "stripe");
 loadGoogleSheet("1NUYtyLyPppreqoFPRfinCphl8u_6Fv6t95s--6LMT0Y", "enrollware");
@@ -335,4 +325,5 @@ map.on("click", function (e) {
 map.addLayer(stripeCluster);
 map.addLayer(enrollwareCluster);
 map.addLayer(officeLayer);
+
 
