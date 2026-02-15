@@ -123,7 +123,7 @@ async function loadGoogleSheet(sheetId, type) {
             <div class="popup-title">Office</div>
             <div><b>Address:</b> ${row["Address"] || "No address"}</div>
             <div><b>City:</b> ${row["City"] || "Unknown"}</div>
-            <div><b>Registration Link:</b> ${row["Registration Link"] || "Unknown"}</div>
+            <div><b>Registration Link:</b> ${row["Registration Link"] ? `<a href="${row["Registration Link"]}" target="_blank">Register Here</a>` : "Unknown"}</div>
           </div>
         `);
         officeLayer.addLayer(marker);
@@ -326,6 +326,7 @@ map.on("click", function (e) {
 map.addLayer(stripeCluster);
 map.addLayer(enrollwareCluster);
 map.addLayer(officeLayer);
+
 
 
 
